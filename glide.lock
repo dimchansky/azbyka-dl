@@ -1,15 +1,29 @@
-hash: d8df94943d96f56400d510250020afcd844e5f61e0f06c4ad971b416eb62e6f7
-updated: 2018-11-16T14:48:32.101737+02:00
+hash: e4382a79bd5e382e016004fd0ca588a97709a044223e01e71dbaf7b26e87b4ee
+updated: 2019-03-05T17:42:42.659138+02:00
 imports:
 - name: github.com/andybalholm/cascadia
   version: 680b6a57bda4f657485ad44bdea42342ead737bc
+- name: github.com/BurntSushi/toml
+  version: 3012a1dbe2e4bd1391d42b32f0577cb7bbc7f005
 - name: github.com/cenkalti/backoff
-  version: 2ea60e5f094469f9e65adb9cd103795b73ae743e
+  version: 1e4cf3da559842a91afcb6ea6141451e6c30c618
 - name: github.com/PuerkitoBio/goquery
   version: 2d2796f41742ece03e8086188fa4db16a3a0b458
+- name: golang.org/x/lint
+  version: 8f45f776aaf18cebc8d65861cc70c33c60471952
+  subpackages:
+  - golint
 - name: golang.org/x/net
   version: 10aee181995363b41f712a55844a0dd52ea04646
   subpackages:
   - html
   - html/atom
+- name: golang.org/x/tools
+  version: 139d099f662071f73eab0df7b7fdf9682c8f9e91
+  subpackages:
+  - cmd/goimports
+- name: honnef.co/go/tools
+  version: c2f93a96b099cbbec1de36336ab049ffa620e6d7
+  subpackages:
+  - cmd/staticcheck
 testImports: []

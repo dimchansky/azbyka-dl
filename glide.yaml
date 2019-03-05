@@ -1,6 +1,18 @@
-package: azbyka-dl
+package: github.com/dimchansky/azbyka-dl
 import:
 - package: github.com/PuerkitoBio/goquery
   version: ^1.5.0
 - package: github.com/cenkalti/backoff
   version: ^2.0.0
+- package: golang.org/x/tools
+  subpackages:
+  - cmd/goimports
+- package: golang.org/x/lint
+  subpackages:
+  - golint
+- package: honnef.co/go/tools
+  version: ^2019.1.0
+  subpackages:
+  - cmd/staticcheck
+- package: github.com/BurntSushi/toml
+  version: ^0.3.1

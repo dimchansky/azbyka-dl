@@ -45,7 +45,7 @@ func run() error {
 	}
 
 	uri := args[0]
-	doc, err := newDocumentFromUrl(uri)
+	doc, err := newDocumentFromURL(uri)
 	if err != nil {
 		return err
 	}
@@ -103,20 +103,13 @@ type wpPlaylistScript struct {
 	Images       bool   `json:"images"`
 	Artists      bool   `json:"artists"`
 	Tracks       []struct {
-		Src         string `json:"src"`
-		Type        string `json:"type"`
-		Title       string `json:"title"`
-		Caption     string `json:"caption"`
-		Description string `json:"description"`
-		Meta        struct {
-			LengthFormatted string `json:"length_formatted"`
-			Artist          string `json:"artist"`
-			Album           string `json:"album"`
-		} `json:"meta"`
+		Src     string `json:"src"`
+		Title   string `json:"title"`
+		Caption string `json:"caption"`
 	} `json:"tracks"`
 }
 
-func newDocumentFromUrl(url string) (*goquery.Document, error) {
+func newDocumentFromURL(url string) (*goquery.Document, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("http.Get: %v", err)
@@ -137,7 +130,7 @@ func newDocumentFromUrl(url string) (*goquery.Document, error) {
 	return doc, nil
 }
 
-var httpStatusServiceUnavailableErr = errors.New("503 Service Temporarily Unavailable")
+var errHTTPStatusServiceUnavailable = errors.New("503 Service Temporarily Unavailable")
 
 func downloadFile(filepath string, url string) error {
 	const permanentOn = 10
@@ -150,7 +143,7 @@ func downloadFile(filepath string, url string) error {
 		}
 
 		err := downloadFileAux(filepath, url)
-		if err == nil || err == httpStatusServiceUnavailableErr {
+		if err == nil || err == errHTTPStatusServiceUnavailable {
 			return err
 		}
 		return backoff.Permanent(err)
@@ -182,7 +175,7 @@ func downloadFileAux(filepath string, url string) error {
 	switch resp.StatusCode {
 	case http.StatusOK:
 	case http.StatusServiceUnavailable:
-		return httpStatusServiceUnavailableErr
+		return errHTTPStatusServiceUnavailable
 	default:
 		return fmt.Errorf("status code error: %d %s", resp.StatusCode, resp.Status)
 	}
