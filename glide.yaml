@@ -1,0 +1,6 @@
+package: azbyka-dl
+import:
+- package: github.com/PuerkitoBio/goquery
+  version: ^1.5.0
+- package: github.com/cenkalti/backoff
+  version: ^2.0.0
