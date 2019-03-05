@@ -1,0 +1,38 @@
+language: go
+sudo: false
+
+go:
+  - 1.12
+
+cache:
+  directories:
+    - vendor
+
+env:
+  global:
+    - ARTIFACTS_DIR=artifacts
+
+install:
+  - make dependencies
+
+script:
+  - make lint
+  - make test
+
+after_success:
+  - make cover
+  - bash <(curl -s https://codecov.io/bash) -s ./${ARTIFACTS_DIR}/.cover
+  - make buildx
+
+deploy:
+  provider: releases
+  api_key:
+    secure: nSmujCiCYjGqcX3fkYki0OlFDCikRsOO0GKU0mCJ2oT6FcFp7w3VvN9VSxiKFkVOa+maLJkgCmcV8jxwZeyLSX3DbP2D8vsc3TR0HDYbdQoAJ4La0Npf7lACFU7Kr0PmLPhDRjbpmvjapuXHERKxlbMgfcght+rQMEBoWLYWWLrxUIllmycQEyjTgpfBUN0/Aa9ivhvV/QJzHoJ0COfpqPGNV0hgYfcYQ6l1hnhr/ueEPXI4y2tcF+DvCmnNWv8okO76XqeJvz+GvwLz9Y+MfboD7D+LGGUvOy1Zc5FeYWKHNNZY5c6aaMAGNzIIZMar0lcRFYw3vs/YimFVDzbrOVLEOHrJKnXjgy/7btLBiQzfRCtbCzt3xHKcj6NAhmQ9JNSP3lJpliVD1tFkeBrhD2MiSDTERoxmWx4UnmgykSwC+3x39ylBszyocMzWFr3X1XZAQV3T6OB6RXmF61Ncv7QOBva1SkkZC9mGrHdV4Jj5a1q04ynC81z59/CnXze8oTu27YvJLZu4bLfCZKQPLUcJ1D2b+ySx8ecimcjIsiQK8XQLhij8lMGT5PPIQrVEhD6STjcvAle6/jdGy+7+Hx+RTji41gDmVN+2oIawX0XX9MWdeCsN8WeRWoGAf+vGjLRJYduR/O1JZTeK1dcZZmxT8CjnNJYyIwnTNak3RUo=
+  file: ${ARTIFACTS_DIR}/*.{zip,tgz}
+  file_glob: true
+  skip_cleanup: true
+  overwrite: true
+  draft: true
+  on:
+    repo: ${TRAVIS_REPO_SLUG}
+    tags: true

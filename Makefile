@@ -43,6 +43,13 @@ lint: ; $(info $(M) running lint tools…)
 test: ; $(info $(M) running tests…)
 	go test -tags=dev -timeout 40s -race -v $(PKGS)
 
+.PHONY: cover
+cover:
+	mkdir -p ./${ARTIFACTS_DIR}/.cover
+	go test -race -coverprofile=./${ARTIFACTS_DIR}/.cover/cover.out -covermode=atomic -coverpkg=./... $(PKGS)
+	go tool cover -func=./${ARTIFACTS_DIR}/.cover/cover.out
+	go tool cover -html=./${ARTIFACTS_DIR}/.cover/cover.out -o ./${ARTIFACTS_DIR}/cover.html
+
 .PHONY: fmt
 fmt: ; $(info $(M) formatting the code…)
 	@echo "$(M2) formatting files..."
