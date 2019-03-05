@@ -18,6 +18,15 @@ import (
 	"github.com/cenkalti/backoff"
 )
 
+var (
+	// Version (set by compiler) is the version of program
+	Version = "undefined"
+	// BuildTime (set by compiler) is the program build time in '+%Y-%m-%dT%H:%M:%SZ' format
+	BuildTime = "undefined"
+	// GitHash (set by compiler) is the git commit hash of source tree
+	GitHash = "undefined"
+)
+
 func init() {
 	// otherwise on some files get an error "stream error: stream ID 1; PROTOCOL_ERROR"
 	_ = os.Setenv("GODEBUG", "http2client=0")
@@ -37,6 +46,11 @@ func run() error {
 	)
 	flag.StringVar(&dirPath, "dir", ".", "directory name where to save the files")
 	flag.Uint64Var(&skipFilesCount, "skip", 0, "number of files to skip")
+	defaultUsage := flag.Usage
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "Version: %s\tBuildTime: %v\tGitHash: %s\n", Version, BuildTime, GitHash)
+		defaultUsage()
+	}
 	flag.Parse()
 
 	args := flag.Args()
