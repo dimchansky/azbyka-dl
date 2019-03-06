@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/cenkalti/backoff"
@@ -59,23 +60,14 @@ func run() error {
 	}
 
 	uri := args[0]
-	doc, err := newDocumentFromURL(uri)
+	tracks, err := getTracks(uri)
 	if err != nil {
 		return err
 	}
 
-	sel := doc.Find("script.wp-playlist-script")
-	if len(sel.Nodes) == 0 {
-		return errors.New("playlist is not found on the page")
-	}
-	var sc wpPlaylistScript
-	if err := json.Unmarshal([]byte(sel.Text()), &sc); err != nil {
-		return fmt.Errorf("JSON parsing error: %v", err)
-	}
-
-	fileNameFormat := fmt.Sprintf("%%0%dd-%%s%%s", len(strconv.Itoa(len(sc.Tracks))))
+	fileNameFormat := fmt.Sprintf("%%0%dd-%%s%%s", len(strconv.Itoa(len(tracks))))
 	idx := uint64(0)
-	for _, tr := range sc.Tracks {
+	for _, tr := range tracks {
 		idx++
 
 		uri := tr.Src
@@ -93,7 +85,7 @@ func run() error {
 			return err
 		}
 		ext := filepath.Ext(path.Base(uriParsed.Path))
-		fileName := fmt.Sprintf(fileNameFormat, idx, caption, ext)
+		fileName := limitFileName(fmt.Sprintf(fileNameFormat, idx, caption, ext), 255)
 		filePath := path.Join(dirPath, fileName)
 
 		if idx > skipFilesCount {
@@ -110,17 +102,50 @@ func run() error {
 	return nil
 }
 
+func limitFileName(fileName string, limit int) string {
+	if utf8.RuneCountInString(fileName) <= limit {
+		return fileName
+	}
+
+	runes := []rune(fileName)
+	idx := limit / 2
+	runes[idx] = rune('…')
+	copy(runes[idx+1:], runes[len(runes)-(limit-(idx+1)):])
+
+	return string(runes[:limit])
+}
+
+func getTracks(uri string) ([]track, error) {
+	doc, err := newDocumentFromURL(uri)
+	if err != nil {
+		return nil, err
+	}
+
+	sel := doc.Find("script.wp-playlist-script")
+	if len(sel.Nodes) == 0 {
+		return nil, errors.New("playlist is not found on the page")
+	}
+	var sc wpPlaylistScript
+	if err := json.Unmarshal([]byte(sel.Text()), &sc); err != nil {
+		return nil, fmt.Errorf("JSON parsing error: %v", err)
+	}
+
+	return sc.Tracks, nil
+}
+
+type track struct {
+	Src     string `json:"src"`
+	Title   string `json:"title"`
+	Caption string `json:"caption"`
+}
+
 type wpPlaylistScript struct {
-	Type         string `json:"type"`
-	Tracklist    bool   `json:"tracklist"`
-	Tracknumbers bool   `json:"tracknumbers"`
-	Images       bool   `json:"images"`
-	Artists      bool   `json:"artists"`
-	Tracks       []struct {
-		Src     string `json:"src"`
-		Title   string `json:"title"`
-		Caption string `json:"caption"`
-	} `json:"tracks"`
+	Type         string  `json:"type"`
+	Tracklist    bool    `json:"tracklist"`
+	Tracknumbers bool    `json:"tracknumbers"`
+	Images       bool    `json:"images"`
+	Artists      bool    `json:"artists"`
+	Tracks       []track `json:"tracks"`
 }
 
 func newDocumentFromURL(url string) (*goquery.Document, error) {
