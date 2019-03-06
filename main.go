@@ -110,7 +110,7 @@ func limitFileName(fileName string, limit int) string {
 	runes := []rune(fileName)
 	idx := limit / 2
 	runes[idx] = rune('…')
-	copy(runes[idx+1:], runes[len(runes)-(limit-(idx+1)):])
+	copy(runes[idx+1:], runes[len(runes)+idx+1-limit:])
 
 	return string(runes[:limit])
 }
